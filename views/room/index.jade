@@ -1,0 +1,22 @@
+extends ../layouts/default
+
+
+block content
+
+
+  //user list
+
+  div#userList(style='width:300px')
+    each user in users
+      div(id='#{user.id}') 
+        span #{user.id} from #{user.ip}
+        br
+
+  hr
+  //chat box
+  div#chatWindow(style='width:700px; height:500px')
+
+  input#msgBox(type='text', style='width: 500px')
+
+  input#uId(type='hidden', value='#{uId}')
+  input#rId(type='hidden', value='#{room.url}')
