@@ -22,4 +22,8 @@ module.exports = function(app) {
     //msg route
     var msg = require('../routes/msgRoute');
 
+    //map route
+    var map = require('../routes/mapRoute');
+    app.get('/map', map.index);
+
 }
