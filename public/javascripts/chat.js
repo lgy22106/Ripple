@@ -17,11 +17,8 @@ function clearBox() {
 }
 
 function scroll() {
-  var el = $('#chatWindow');
-  console.log(el.scrollTop);
-  console.log(el.offsetHeight);
-  if(false)
-    el.scrollTop = el.scrollHeight;
+  var obj = document.getElementById('chatWindow');
+  obj.scrollTop = obj.scrollHeight;
 }
 $(function() {
 

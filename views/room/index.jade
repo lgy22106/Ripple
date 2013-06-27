@@ -2,8 +2,8 @@ extends ../layouts/default
 
 
 block content
-  .container-fluid
-    .row-fluid
+  .container
+    .row
       .span9.overflowAuto.chatWindowHeight#chatWindow
       .span3.overflowAuto.chatWindowHeight#userList
         each user in users
@@ -11,14 +11,10 @@ block content
             span #{user.id} from #{user.ip}
             br
       
-
-
-
-
     input#msgBox(type='text', style='width: 500px')
 
-  input#uId(type='hidden', value='#{uId}')
-  input#rId(type='hidden', value='#{room.url}')
+    input#uId(type='hidden', value='#{uId}')
+    input#rId(type='hidden', value='#{room.url}')
 
 block js
   //custom js
