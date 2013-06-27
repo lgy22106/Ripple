@@ -2,21 +2,27 @@ extends ../layouts/default
 
 
 block content
+  .container-fluid
+    .row-fluid
+      .span9.overflowAuto.chatWindowHeight#chatWindow
+      .span3.overflowAuto.chatWindowHeight#userList
+        each user in users
+          div(id='#{user.id}') 
+            span #{user.id} from #{user.ip}
+            br
+      
 
 
-  //user list
 
-  div#userList(style='width:300px')
-    each user in users
-      div(id='#{user.id}') 
-        span #{user.id} from #{user.ip}
-        br
 
-  hr
-  //chat box
-  div#chatWindow(style='width:700px; height:500px')
-
-  input#msgBox(type='text', style='width: 500px')
+    input#msgBox(type='text', style='width: 500px')
 
   input#uId(type='hidden', value='#{uId}')
   input#rId(type='hidden', value='#{room.url}')
+
+block js
+  //custom js
+  script(src='/javascripts/chat.js')
+  script(src='/javascripts/userlist.js')
+
+block css

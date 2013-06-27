@@ -15,6 +15,14 @@ function sendMsg() {
 function clearBox() {
   $('#msgBox').val('');
 }
+
+function scroll() {
+  var el = $('#chatWindow');
+  console.log(el.scrollTop);
+  console.log(el.offsetHeight);
+  if(false)
+    el.scrollTop = el.scrollHeight;
+}
 $(function() {
 
   //init userlist
@@ -23,6 +31,7 @@ $(function() {
   socket.on('message', function(msg) {
     var html = '<span>' + msg.user + ':' + msg.message + '</span><br>';
     $('#chatWindow').append(html);
+    scroll();
   });
 
   socket.on('joinEvent', function(user) {
