@@ -1,9 +1,6 @@
 var socket = io.connect();
 
 
-
-
-
 //helper functions
 function sendMsg() {
   socket.emit('message', {

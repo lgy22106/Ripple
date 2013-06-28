@@ -1,3 +1,5 @@
+var socket = io.connect();
+
 function MapUtil() {
   this.loadMap();
   this.loadControls();
@@ -41,18 +43,10 @@ MapUtil.prototype.loadControls = function() {
   });
 };
 
-MapUtil.prototype.getGeo = function() {
-  if (navigator.geolocation) {
-    console.log(navigator.geolocation.getCurrentPosition);
-    this.addMarker(navigator.geolocation.getCurrentPosition);
-  }
-  else {
-    alert("no position");
-  }
-}
 
-MapUtil.prototype.addMarker = function(position) {
-  var poi=new MQA.Poi({lat:postion.coords.latitude, lng:postion.coords.longitude});
+MapUtil.prototype.addMarker = function(position, user) {
+  var poi=new MQA.Poi({lat:position.coords.latitude, lng:position.coords.longitude});
+  poi.setKey(user.id);
   //http://developer.mapquest.com/web/documentation/sdk/javascript/v6.0.0/api/MQA.Poi.html
   //check here. can fire event that pop the info window.
   poi.setInfoTitleHTML('Sports Authority Field at Mile High');
@@ -60,9 +54,86 @@ MapUtil.prototype.addMarker = function(position) {
   map.addShape(poi);
 }
 
+MapUtil.prototype.pinMarker = function(user) {
+  var thisMap = this;
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(position) {
+      //callback from current position
+      thisMap.addMarker(position, user);
+    });
+  }
+  else {
+    alert("Geolocation is not supported by this browser.");
+    thisMap.addMarker({"coords": 
+                        {latitude: 0,
+                        longitude: 0}
+                      }, user);
+  }
+}
+
+MapUtil.prototype.removeMarker = function() {
+  map.removeShape(map.getByKey("abc"));
+}
+
+//helper functions
+function sendMsg() {
+  socket.emit('message', {
+    user: $('#uId').val(),
+    message: $('#msgBox').val()
+  })
+}
+
+function clearBox() {
+  $('#msgBox').val('');
+}
+
+function async(poi, callback) {
+  
+}
+
 
 
 $(function() {
   var mu = new MapUtil();
-  mu.getGeo();
+  
+
+  socket.on('message', function(data) {
+    //toggle marker for 5sec
+    var poi = map.getByKey(data.user);
+
+    poi.setInfoTitleHTML(data.message);
+    console.log(poi._isRollover);
+    if(typeof poi._isRollover == 'undefined' || poi._isRollover == 0) {
+
+      poi.toggleInfoWindowRollover();
+    }
+
+    setTimeout(function() {
+      poi.toggleInfoWindowRollover();
+    }, 1000);
+
+  });
+
+  socket.on('joinEvent', function(user) {
+    console.log(user);
+    //user joined
+    mu.pinMarker(user);
+  });
+
+  // socket.on('disconnect', function(user) {
+  //   mu.removeMarker(user);
+  // });
+
+  socket.emit('joinEvent', {
+    uId: $('#uId').val()
+  });
+
+
+  $('#msgBox').keypress(function(e) {
+    if(e.which == 13) {
+      e.preventDefault();
+      sendMsg();
+      clearBox();
+    }
+  });
 })

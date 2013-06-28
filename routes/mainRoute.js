@@ -1,4 +1,6 @@
 
 exports.index = function(req, res) {
-  res.render('index');
+  res.render('map/index', {
+    uId: req.session.uId
+  });
 }

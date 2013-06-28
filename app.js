@@ -12,7 +12,7 @@ var express = require('express')
 var app = express();
 
 // all environments
-app.set('port', process.env.PORT || 3001);
+app.set('port', process.env.PORT || 3003);
 app.set('views', __dirname + '/views');
 app.set('view engine', 'jade');
 app.use(express.favicon());
@@ -67,4 +67,7 @@ server.listen(app.get('port'), function(){
 
 
 //socketio
-require('./routes/msgRoute')(server);
+//require('./routes/msgRoute')(server);
+
+//map route
+require('./routes/mapRoute')(server);
