@@ -22,7 +22,7 @@ module.exports = function(server) {
     socket.on('joinEvent', function(data) {
       //push socket to clientlist
       clientList[socket.id] = {uId: data.uId};
-
+      
       io.sockets.emit('joinEvent', {
         id: data.uId,
         loc: data.loc

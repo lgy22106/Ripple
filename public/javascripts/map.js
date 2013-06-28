@@ -43,11 +43,12 @@ MapUtil.prototype.loadControls = function() {
   });
 };
 
-MapUtil.prototype.getLocation = function() {
-  var location;
+MapUtil.prototype.getLocation = function(callback) {
+  var location = null;
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(function(position) {
       location = position;
+      callback(position);
     });
   }
   else {
@@ -56,8 +57,8 @@ MapUtil.prototype.getLocation = function() {
                   longitude: 0}
                 }
   }
-  return location;
 }
+
 
 
 MapUtil.prototype.addMarker = function(position, id) {
@@ -131,6 +132,7 @@ $(function() {
   });
 
   socket.on('joinEvent', function(data) {
+    console.log(JSON.stringify(data));
     //user joined
     mu.addMarker(data.loc, data.id);
   });
@@ -138,11 +140,13 @@ $(function() {
   // socket.on('disconnect', function(user) {
   //   mu.removeMarker(user);
   // });
-
-  socket.emit('joinEvent', {
-    uId: $('#uId').val(),
-    loc: mu.getLocation()
-  });
+  mu.getLocation(function(position) {
+    socket.emit('joinEvent', {
+      uId: $('#uId').val(),
+      loc: position
+    });
+  })
+  
 
 
   $('#msgBox').keypress(function(e) {
