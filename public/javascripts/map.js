@@ -43,10 +43,26 @@ MapUtil.prototype.loadControls = function() {
   });
 };
 
+MapUtil.prototype.getLocation = function() {
+  var location;
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(function(position) {
+      location = position;
+    });
+  }
+  else {
+    location = {"coords": 
+                  {latitude: 0,
+                  longitude: 0}
+                }
+  }
+  return location;
+}
 
-MapUtil.prototype.addMarker = function(position, user) {
+
+MapUtil.prototype.addMarker = function(position, id) {
   var poi=new MQA.Poi({lat:position.coords.latitude, lng:position.coords.longitude});
-  poi.setKey(user.id);
+  poi.setKey(id);
   //http://developer.mapquest.com/web/documentation/sdk/javascript/v6.0.0/api/MQA.Poi.html
   //check here. can fire event that pop the info window.
   poi.setInfoTitleHTML('Sports Authority Field at Mile High');
@@ -114,10 +130,9 @@ $(function() {
 
   });
 
-  socket.on('joinEvent', function(user) {
-    console.log(user);
+  socket.on('joinEvent', function(data) {
     //user joined
-    mu.pinMarker(user);
+    mu.addMarker(data.loc, data.id);
   });
 
   // socket.on('disconnect', function(user) {
@@ -125,7 +140,8 @@ $(function() {
   // });
 
   socket.emit('joinEvent', {
-    uId: $('#uId').val()
+    uId: $('#uId').val(),
+    loc: mu.getLocation()
   });
 
 
