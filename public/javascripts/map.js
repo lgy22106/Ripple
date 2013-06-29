@@ -37,8 +37,6 @@ MapUtil.prototype.loadControls = function() {
       new MQA.MapCornerPlacement(MQA.MapCorner.TOP_RIGHT, new MQA.Size(10,50))
     );
 
-    
-
     map.enableMouseWheelZoom();
   });
 };
@@ -66,36 +64,31 @@ MapUtil.prototype.addMarker = function(position, id) {
   poi.setKey(id);
   //http://developer.mapquest.com/web/documentation/sdk/javascript/v6.0.0/api/MQA.Poi.html
   //check here. can fire event that pop the info window.
-  poi.setInfoTitleHTML('Sports Authority Field at Mile High');
-  poi.setInfoContentHTML('Home of the Denver Broncos');
+  // poi.setInfoTitleHTML('Sports Authority Field at Mile High');
+  // poi.setInfoContentHTML('Home of the Denver Broncos');
   map.addShape(poi);
 }
-
-MapUtil.prototype.pinMarker = function(user) {
-  var thisMap = this;
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(function(position) {
-      //callback from current position
-      thisMap.addMarker(position, user);
-    });
-  }
-  else {
-    alert("Geolocation is not supported by this browser.");
-    thisMap.addMarker({"coords": 
-                        {latitude: 0,
-                        longitude: 0}
-                      }, user);
+MapUtil.prototype.addMarkers = function(list) {
+  for(var key in list) {
+    if(map.getByKey(key) == null) {
+      console.log("created");
+      this.addMarker(list[key].loc, key);
+    }
   }
 }
 
-MapUtil.prototype.removeMarker = function() {
-  map.removeShape(map.getByKey("abc"));
+MapUtil.prototype.removeMarker = function(id) {
+  map.removeShape(map.getByKey(id));
 }
 
+MapUtil.prototype.loadMarkers = function(list) {
+  for(var i = 0; i < list.length; i++) {
+    this.addMarker(list[i].loc, list[i].id);
+  }
+}
 //helper functions
 function sendMsg() {
   socket.emit('message', {
-    user: $('#uId').val(),
     message: $('#msgBox').val()
   })
 }
@@ -104,9 +97,6 @@ function clearBox() {
   $('#msgBox').val('');
 }
 
-function async(poi, callback) {
-  
-}
 
 
 
@@ -119,7 +109,6 @@ $(function() {
     var poi = map.getByKey(data.user);
 
     poi.setInfoTitleHTML(data.message);
-    console.log(poi._isRollover);
     if(typeof poi._isRollover == 'undefined' || poi._isRollover == 0) {
 
       poi.toggleInfoWindowRollover();
@@ -132,22 +121,23 @@ $(function() {
   });
 
   socket.on('joinEvent', function(data) {
-    console.log(JSON.stringify(data));
     //user joined
     mu.addMarker(data.loc, data.id);
   });
 
-  // socket.on('disconnect', function(user) {
-  //   mu.removeMarker(user);
-  // });
+  socket.on('init', function(data) {
+    mu.addMarkers(data);
+  })
+
+  socket.on('disconnect', function(data) {
+    mu.removeMarker(data.id);
+  });
+
   mu.getLocation(function(position) {
     socket.emit('joinEvent', {
-      uId: $('#uId').val(),
       loc: position
     });
-  })
-  
-
+  });
 
   $('#msgBox').keypress(function(e) {
     if(e.which == 13) {
