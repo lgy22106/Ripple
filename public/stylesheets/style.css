@@ -10,3 +10,11 @@ body {
 .chatWindowHeight {
   height:600px;
 }
+
+.marginTop10 {
+  margin-top: 10px;
+}
+
+.marginRight30 {
+  margin-right: 30px;
+}

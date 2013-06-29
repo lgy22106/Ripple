@@ -10,12 +10,11 @@ MapUtil.prototype.loadMap = function() {
   var options={
     elt:document.getElementById('map'),       /*ID of element on the page where you want the map added*/ 
     zoom:1,                                  /*initial zoom level of the map*/ 
-    latLng:{lat:40.735383, lng:-73.984655},   /*center of map in latitude/longitude */ 
+    latLng:{lat:36.315125, lng:90.324097},   /*center of map in latitude/longitude */ 
     mtype:'osm',                              /*map type (osm)*/ 
     bestFitMargin:0,                          /*margin offset from the map viewport when applying a bestfit on shapes*/ 
     zoomOnDoubleClick:true                    /*zoom in when double-clicking on map*/ 
   };
-
   /*Construct an instance of MQA.TileMap with the options object*/
 
   //interesting. this makes the map var global 
@@ -86,6 +85,8 @@ MapUtil.prototype.loadMarkers = function(list) {
     this.addMarker(list[i].loc, list[i].id);
   }
 }
+
+
 //helper functions
 function sendMsg() {
   socket.emit('message', {
@@ -97,6 +98,11 @@ function clearBox() {
   $('#msgBox').val('');
 }
 
+function setName() {
+  socket.emit('nameChange', {
+    name: $('#nameBox').val()
+  });
+}
 
 
 
@@ -106,9 +112,15 @@ $(function() {
 
   socket.on('message', function(data) {
     //toggle marker for 5sec
-    var poi = map.getByKey(data.user);
+    var poi = map.getByKey(data.id);
 
-    poi.setInfoTitleHTML(data.message);
+
+    if(typeof data.name == 'undefined') {
+      poi.setInfoTitleHTML(data.message);
+    }
+    else {
+      poi.setInfoTitleHTML('<b>' + data.name + '</b>: '+ data.message);
+    }
     if(typeof poi._isRollover == 'undefined' || poi._isRollover == 0) {
 
       poi.toggleInfoWindowRollover();
@@ -124,6 +136,7 @@ $(function() {
     //user joined
     mu.addMarker(data.loc, data.id);
   });
+
 
   socket.on('init', function(data) {
     mu.addMarkers(data);
@@ -145,5 +158,19 @@ $(function() {
       sendMsg();
       clearBox();
     }
+  });
+
+  $('#nameBox').keypress(function(e) {
+    if(e.which == 13) {
+      e.preventDefault();
+      $('#msgBox').focus();
+      //notify name set
+      setName();
+    }
+  });
+
+  $('#nameBox').focusout(function() {
+    //notify name set
+    setName();
   });
 })

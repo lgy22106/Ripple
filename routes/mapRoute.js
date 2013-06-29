@@ -10,11 +10,13 @@ module.exports = function(server) {
   io.sockets.on('connection', function(socket){
     
     socket.on('message', function(data) {
+
       //when server recevies a message
       //emit will send it to everyone else
       io.sockets.emit('message', {
-        user: socket.id,
-        message: data.message
+        id: socket.id,
+        message: data.message,
+        name: clientList[socket.id].name
       });
     });
 
@@ -31,7 +33,10 @@ module.exports = function(server) {
       
     });
 
-    
+    socket.on('nameChange', function(data) {
+      clientList[socket.id].name = data.name;
+
+    });
 
     socket.on('disconnect', function() {
       delete clientList[socket.id];

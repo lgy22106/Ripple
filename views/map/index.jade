@@ -5,7 +5,11 @@ block content
   .container
     #map(style='width:1170px; height:600px;')
 
-    input#msgBox(type='text', style='width:1160px')
+
+    div.marginTop10
+      input#nameBox.span3.marginRight30(type='text', placeholder='Set a name')
+      input#msgBox.span9(type='text', placeholder='Send a message...')
+
     input#uId(type='hidden', value='#{uId}')
 
 
