@@ -3,7 +3,7 @@ var socket = io.connect();
 function MapUtil() {
   this.loadMap();
   this.loadControls();
-
+  this.createChatWindow();
 };
 
 MapUtil.prototype.loadMap = function() {
@@ -80,18 +80,21 @@ MapUtil.prototype.removeMarker = function(id) {
   map.removeShape(map.getByKey(id));
 }
 
-MapUtil.prototype.loadMarkers = function(list) {
-  for(var i = 0; i < list.length; i++) {
-    this.addMarker(list[i].loc, list[i].id);
-  }
+MapUtil.prototype.createChatWindow = function() {
+  var chatWindow = document.createElement('div');
+  chatWindow.id = 'chatWindow';
+  document.getElementById('map').appendChild(chatWindow);
 }
 
 
 //helper functions
 function sendMsg() {
-  socket.emit('message', {
-    message: $('#msgBox').val()
-  })
+  if($('#msgBox').val() != ''){
+    socket.emit('message', {
+      message: $('#msgBox').val()
+    });
+  }
+  
 }
 
 function clearBox() {
@@ -104,12 +107,32 @@ function setName() {
   });
 }
 
+function scroll() {
+  var obj = document.getElementById('chatWindow');
+  obj.scrollTop = obj.scrollHeight;
+}
+
+function addMsgToWindow(name, message) {
+  var html;
+  if(typeof name == 'undefined') {
+    html = '<span><b>Anonymous</b>: ' + message + '</span><br/><hr/>';
+  }
+  else {
+    html = '<span><b>' + name + '</b>: ' + message + '</span><br/><hr/>';
+  }
+  $('#chatWindow').append(html);
+
+
+  //set fade
+  
+  $('#chatWindow').fadeTo("slow", 75).delay(1000).fadeTo("slow", 0);
+}
 
 
 $(function() {
   var mu = new MapUtil();
   
-
+  var timer;
   socket.on('message', function(data) {
     //toggle marker for 5sec
     var poi = map.getByKey(data.id);
@@ -124,12 +147,36 @@ $(function() {
     if(typeof poi._isRollover == 'undefined' || poi._isRollover == 0) {
 
       poi.toggleInfoWindowRollover();
+      setTimeout(function() {
+        poi.toggleInfoWindowRollover();
+      }, 2000);
+    }
+    else {
+      if(typeof data.name == 'undefined') {
+        poi.setInfoTitleHTML(data.message);
+      }
+      else {
+        poi.setInfoTitleHTML('<b>' + data.name + '</b>: '+ data.message);
+      }
     }
 
-    setTimeout(function() {
-      poi.toggleInfoWindowRollover();
-    }, 1000);
 
+    
+    // if(typeof timer != 'undefined' || timer != null) {
+    //   timer = null;
+    //   clearTimeout(timer);
+    //   poi.toggleInfoWindowRollover();
+    // }
+    // else {
+    //   poi.toggleInfoWindowRollover();
+    //   timer = setTimeout(function() {
+    //     poi.toggleInfoWindowRollover();
+    //     timer = null;
+    //   }, 2000);
+    // }
+
+    addMsgToWindow(data.name, data.message);
+    scroll();
   });
 
   socket.on('joinEvent', function(data) {
@@ -173,4 +220,14 @@ $(function() {
     //notify name set
     setName();
   });
+
+  //chat window set up
+  $('#chatWindow').mouseenter(function() {
+    $('#chatWindow').fadeTo("slow", 75);
+  });
+
+  $('#chatWindow').mouseleave(function() {
+    $('#chatWindow').fadeTo("slow", 0);
+  });
+
 })
